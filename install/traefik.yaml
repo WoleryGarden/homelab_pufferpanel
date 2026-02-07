@@ -1,0 +1,15 @@
+http:
+  routers:
+    pufferpanel:
+      rule: Host(`{{ env "DOMAIN" }}`)
+      entryPoints: [websecure]
+      service: pufferpanel
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: {{ env "DOMAIN" }}
+  services:
+    pufferpanel:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8080"

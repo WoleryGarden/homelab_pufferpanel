@@ -1,0 +1,26 @@
+services:
+  traefik:
+    image: traefik:v3.6.7
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - --entryPoints.websecure.address=:443
+      - --providers.docker.exposedByDefault=false
+      - --certificatesResolvers.letsencrypt.acme.email=$LE_EMAIL
+      - --certificatesResolvers.letsencrypt.acme.storage=/etc/traefik/acme.json
+      - --certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
+      - --providers.file.filename=/file.yaml
+    environment:
+      # Cloudflare token for DNS auth, so we could generate certs even if the site is not exposed to the internet
+      - CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN
+      - DOMAIN=$DOMAIN
+    ports:
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/etc/traefik
+      - ./traefik.yaml:/file.yaml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: local

@@ -1,0 +1,1 @@
+pufferpanel ALL=(root) SETENV: NOPASSWD: /usr/sbin/resetacl.ps1

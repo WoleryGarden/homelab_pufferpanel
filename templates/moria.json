@@ -1,0 +1,81 @@
+{
+    "type": "andrew",
+    "display": "Lord of the Rings: Return to Moria",
+    "data": {
+        "CONTAINER_NAME": {
+            "type": "string",
+            "value": "moria",
+            "display": "Container Name",
+            "required": true,
+            "userEdit": true
+        },
+        "CONTAINER_PORT": {
+            "type": "integer",
+            "value": 7777,
+            "display": "Container Port",
+            "required": true,
+            "userEdit": true
+        }
+    },
+    "install": [
+        {
+            "type": "writefile",
+            "text": "services:\r\n  moria:\r\n    image: andrewsav/moria\r\n    container_name: ${CONTAINER_NAME}\r\n    restart: unless-stopped\r\n    stop_signal: SIGINT # This is for graceful termination, do not change it, unless you know what you are doing\r\n    volumes:\r\n      - './server:/server'\r\n      - './steam:/root/Steam'\r\n    ports:\r\n      - '${CONTAINER_PORT}:7777/udp'\r\n    stdin_open: true # docker run -i, so we can issue commands to the console\r\n    tty: true        # docker run -t, so we can attach to the console\r\n",
+            "target": "compose.yaml"
+        },
+        {
+            "type": "command",
+            "commands": [
+                "docker compose --progress=plain pull"
+            ]
+        },
+        {
+            "type": "writefile",
+            "target": "id-${CONTAINER_NAME}",
+            "text": ""
+        }
+    ],
+    "uninstall": null,
+    "run": {
+        "command": "docker compose --progress=plain up --force-recreate --menu=false ",
+        "stopCode": 9,
+        "post": [
+            {
+                "type": "command",
+                "commands": [
+                    "docker compose --progress=plain down",
+                    "env TERM=dumb sudo -E /usr/sbin/resetacl.ps1"
+                ]
+            }
+        ],
+        "stdin": {
+            "type": "stdin"
+        },
+        "autostart": false,
+        "autorecover": false,
+        "autorestart": false,
+        "pre": []
+    },
+    "environment": {
+        "type": "host"
+    },
+    "supportedEnvironments": [
+        {
+            "type": "host",
+            "disableUnshare": true,
+            "mounts": []
+        }
+    ],
+    "requirements": {},
+    "stats": {
+        "type": ""
+    },
+    "query": {
+        "type": ""
+    },
+    "keepAlive": {
+        "frequency": "",
+        "command": ""
+    },
+    "name": "moria"
+}
