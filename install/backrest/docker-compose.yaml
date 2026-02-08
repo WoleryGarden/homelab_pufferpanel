@@ -1,0 +1,35 @@
+services:
+  backrest:
+    image: ghcr.io/garethgeorge/backrest:latest
+    container_name: backrest
+    hostname: backrest
+    volumes:
+      - ./data:/data
+      - ./config:/config
+      - ./cache:/cache
+      - ./tmp:/tmp
+      - ./rclone:/root/.config/rclone # Mount for rclone config (needed when using rclone remotes)
+      - /var/lib/pufferpanel/servers:/userdata  # Mount local paths to backup
+      #- /path/to/local/repos:/repos     # Mount local repos (optional for remote storage)
+    environment:
+      - BACKREST_DATA=/data
+      - BACKREST_CONFIG=/config/config.json
+      - XDG_CACHE_HOME=/cache
+      - TMPDIR=/tmp
+      - TZ=Pacific/Auckland
+    #ports:
+    #  - "9898:9898"
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backrest.rule=Host(`$BACKREST_DOMAIN`)"
+      - "traefik.http.routers.backrest.entrypoints=websecure"
+      - "traefik.http.routers.backrest.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backrest.service=backrest"
+      - "traefik.http.services.backrest.loadbalancer.server.port=9898"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true

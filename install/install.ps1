@@ -77,7 +77,7 @@ $out | sudo tee $configPath > $null
 sudo systemctl enable --now pufferpanel
 
 Write-Host "Installing ACL utilities..."
-sudo apt install -y acl
+sudo apt install -y acl bzip2
 
 $servers = "$($json.daemon.data.root)/servers"
 
@@ -96,10 +96,14 @@ Write-Host "Installing sudoers rule..."
 & sudo curl -fsSL "$baseUrl/pufferpanel-resetacl" -o /etc/sudoers.d/pufferpanel-resetacl
 & sudo chmod 440 /etc/sudoers.d/pufferpanel-resetacl
 
+Write-Host "Installing restic..."
+& curl -fsSL "$baseUrl/restic-install.ps1" -o (Join-Path $workDir "restic-install.ps1")
+& (Join-Path $workDir "restic-install.ps1")
+
 Write-Host "Preparing Traefik directory..."
 New-Item -ItemType Directory -Force -Path $traefikDir | Out-Null
-& curl -fsSL "$baseUrl/docker-compose.yaml" -o (Join-Path $traefikDir "docker-compose.yaml")
-& curl -fsSL "$baseUrl/traefik.yaml" -o (Join-Path $traefikDir "traefik.yaml")
+& curl -fsSL "$baseUrl/traefik/docker-compose.yaml" -o (Join-Path $traefikDir "docker-compose.yaml")
+& curl -fsSL "$baseUrl/traefik/traefik.yaml" -o (Join-Path $traefikDir "traefik.yaml")
 
 Copy-Item -Force -Path (Join-Path $workDir ".env") -Destination (Join-Path $traefikDir ".env")
 
